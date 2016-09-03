@@ -25,8 +25,8 @@ public class MenuActivity extends AppCompatActivity {
     @BindView(R.id.logout)
     Button logout;
 
-    private FirebaseAuth mFirebaseAuth;
-    private FirebaseUser mFirebaseUser;
+    FirebaseAuth mFirebaseAuth;
+    FirebaseUser mFirebaseUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

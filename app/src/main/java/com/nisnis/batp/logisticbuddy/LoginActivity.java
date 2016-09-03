@@ -25,8 +25,8 @@ public class LoginActivity extends AppCompatActivity {
     @BindView(R.id.btn_login)
     Button login;
 
-    private FirebaseAuth mFirebaseAuth;
-    private FirebaseUser mFirebaseUser;
+    FirebaseAuth mFirebaseAuth;
+    FirebaseUser mFirebaseUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
