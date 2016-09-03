@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "264810539756",
+    "firebase_url": "https://bamboo-host-142304.firebaseio.com",
+    "project_id": "bamboo-host-142304",
+    "storage_bucket": "bamboo-host-142304.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:264810539756:android:cd5b8451ac9c1d66",
+        "android_client_info": {
+          "package_name": "com.nisnis.batp.logisticbuddy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "264810539756-l16hdrd5cickbhkr84235u92059p1rg4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAyrzO4SBp66TMcI6RK--C_HLKTX3544o"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

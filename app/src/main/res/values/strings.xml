@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">LogisticBuddy</string>
+    <string name="app_name">Logistic Buddy</string>
+    <string name="title_activity_menu">Logistic Buddy</string>
+    <string name="title_activity_driver">Driver Map</string>
 </resources>

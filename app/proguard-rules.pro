@@ -15,3 +15,13 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-keep public class * implements butterknife.internal.ViewBinder { public <init>(); }
+-keep class butterknife.*
+-keepclasseswithmembernames class * { @butterknife.* <methods>; }
+-keepclasseswithmembernames class * { @butterknife.* <fields>; }
+ -keep class **$$ViewInjector { *; }
+ -keep class **$$ViewBinder { *; }
+ -keep class **$$ViewBinder { *; }
+ -keep class **$ViewHolder { *; }
+ -keep class butterknife.**$Finder { *; }
