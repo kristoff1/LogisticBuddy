@@ -1,6 +1,7 @@
 package com.nisnis.batp.logisticbuddy;
 
 import android.Manifest;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.annotation.NonNull;
@@ -8,15 +9,23 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.widget.TextViewCompat;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStates;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -30,10 +39,24 @@ import com.google.firebase.database.ValueEventListener;
 import com.nisnis.batp.logisticbuddy.model.Data;
 import com.nisnis.batp.logisticbuddy.model.MapData;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class DriverActivity extends FragmentActivity implements
-        OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+        OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        LocationListener {
+
+    private static final String REQUESTING_LOCATION_UPDATES_KEY = "REQUESTING_LOCATION_UPDATES_KEY";
+    private static final String LOCATION_KEY = "LOCATION_KEY";
+    private static final String LAST_UPDATED_TIME_STRING_KEY = "LAST_UPDATED_TIME_STRING_KEY";
+    private static final int REQUEST_CHECK_SETTINGS = 100;
+    @BindView(R.id.last_update_time)
+    TextView lastUpdateTime;
 
     //max zoom 21.0f, min zoom 2.0f
     private static final float DEFAULT_ZOOM = 17.0f;
@@ -44,19 +67,41 @@ public class DriverActivity extends FragmentActivity implements
     Location mLastLocation;
     GoogleApiClient mGoogleApiClient;
     DatabaseReference mFirebaseDatabaseReference;
+    LocationRequest mLocationRequest;
+    private boolean mRequestingLocationUpdates = false;
+    private String mLastUpdateTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        ButterKnife.bind(this);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
         listMarker = new ArrayList<>();
         initializeGoogleApiClient();
+        createLocationRequest();
         initializeFirebase();
+
+        updateValuesFromBundle(savedInstanceState);
+    }
+
+    private void updateValuesFromBundle(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+
+
+            if (savedInstanceState.keySet().contains(LOCATION_KEY)) {
+                mLastLocation = savedInstanceState.getParcelable(LOCATION_KEY);
+            }
+
+            if (savedInstanceState.keySet().contains(LAST_UPDATED_TIME_STRING_KEY)) {
+                mLastUpdateTime = savedInstanceState.getString(
+                        LAST_UPDATED_TIME_STRING_KEY);
+            }
+            updateUI();
+        }
     }
 
     @Override
@@ -157,21 +202,22 @@ public class DriverActivity extends FragmentActivity implements
                             android.Manifest.permission.ACCESS_COARSE_LOCATION},
                     PERMISSION_ACCESS_FINE_LOCATION);
             return;
-        }else {
+        } else {
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
             if (mLastLocation != null) {
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(mLastLocation.getLatitude(),
-                                    mLastLocation.getLongitude()),
-                            DEFAULT_ZOOM));
+               updateUI();
+            }
+
+            if (mRequestingLocationUpdates) {
+                startLocationUpdates();
             }
         }
 
     }
 
     protected void createLocationRequest() {
-        LocationRequest mLocationRequest = new LocationRequest();
+        mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10000);
         mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -182,6 +228,51 @@ public class DriverActivity extends FragmentActivity implements
         PendingResult<LocationSettingsResult> result =
                 LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient,
                         builder.build());
+
+        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(@NonNull LocationSettingsResult result) {
+                final Status status = result.getStatus();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        break;
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        // Location settings are not satisfied, but this can be fixed
+                        // by showing the user a dialog.
+                        try {
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            status.startResolutionForResult(
+                                    DriverActivity.this,
+                                    REQUEST_CHECK_SETTINGS);
+                        } catch (IntentSender.SendIntentException e) {
+                            // Ignore the error.
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        break;
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mGoogleApiClient.isConnected() && !mRequestingLocationUpdates) {
+            startLocationUpdates();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+    protected void stopLocationUpdates() {
+        LocationServices.FusedLocationApi.removeLocationUpdates(
+                mGoogleApiClient, this);
     }
 
     @Override
@@ -192,6 +283,44 @@ public class DriverActivity extends FragmentActivity implements
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
+    }
+
+
+    @Override
+    public void onLocationChanged(Location location) {
+        mLastLocation = location;
+        updateUI();
+    }
+
+    private void updateUI() {
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                new LatLng(mLastLocation.getLatitude(),
+                        mLastLocation.getLongitude()),
+                DEFAULT_ZOOM));
+        mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+        lastUpdateTime.setText(mLastUpdateTime);
+    }
+
+    protected void startLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                            android.Manifest.permission.ACCESS_COARSE_LOCATION},
+                    PERMISSION_ACCESS_FINE_LOCATION);
+            return;
+        }else {
+            LocationServices.FusedLocationApi.requestLocationUpdates(
+                    mGoogleApiClient, mLocationRequest, this);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY,
+                mRequestingLocationUpdates);
+        outState.putParcelable(LOCATION_KEY, mLastLocation);
+        outState.putString(LAST_UPDATED_TIME_STRING_KEY, mLastUpdateTime);
+        super.onSaveInstanceState(outState);
     }
 
 

@@ -23,6 +23,21 @@
             android:layout_below="@id/current_location_title"
             android:text="I'm at the base" />
 
+        <TextView
+            android:id="@+id/last_update_time_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/current_location"
+            android:textStyle="bold"
+            android:text="Last update time : " />
+
+        <TextView
+            android:id="@+id/last_update_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/last_update_time_title"
+            android:text="29 jan 2016" />
+
         <android.support.v7.widget.AppCompatButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -30,6 +45,7 @@
             android:layout_alignParentRight="true"
             android:background="@color/colorAccent"
             android:textColor="@color/white"
+            android:layout_centerVertical="true"
             android:text="NEXT"
             />
 
