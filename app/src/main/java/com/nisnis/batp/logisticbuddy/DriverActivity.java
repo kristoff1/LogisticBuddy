@@ -1,6 +1,10 @@
 package com.nisnis.batp.logisticbuddy;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -9,8 +13,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.support.v4.widget.TextViewCompat;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -18,13 +23,11 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -39,6 +42,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.nisnis.batp.logisticbuddy.model.Data;
 import com.nisnis.batp.logisticbuddy.model.MapData;
 
+import java.sql.Driver;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -55,8 +59,16 @@ public class DriverActivity extends FragmentActivity implements
     private static final String LOCATION_KEY = "LOCATION_KEY";
     private static final String LAST_UPDATED_TIME_STRING_KEY = "LAST_UPDATED_TIME_STRING_KEY";
     private static final int REQUEST_CHECK_SETTINGS = 100;
+    private static final float METERS_100 = 100f;
+    private static final String TAG_DIALOG = "TAG_DIALOG";
     @BindView(R.id.last_update_time)
     TextView lastUpdateTime;
+
+    @BindView(R.id.current_location)
+    TextView currentLocation;
+
+    @BindView(R.id.confirmButton)
+    Button confirmButton;
 
     //max zoom 21.0f, min zoom 2.0f
     private static final float DEFAULT_ZOOM = 17.0f;
@@ -86,6 +98,32 @@ public class DriverActivity extends FragmentActivity implements
         initializeFirebase();
 
         updateValuesFromBundle(savedInstanceState);
+
+        initViewListener();
+    }
+
+    private void initViewListener() {
+        confirmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                Fragment prev = getFragmentManager().findFragmentByTag(TAG_DIALOG);
+                if (prev != null) {
+                    ft.remove(prev);
+                }
+                ft.addToBackStack(null);
+
+                DialogFragment dialogFragment = ConfirmDialog.createInstance();
+                ((ConfirmDialog) dialogFragment).setListener(new ConfirmDialog.OnConfirmOrderListener() {
+                    @Override
+                    public void onConfirm() {
+                        listMarker.remove(0);
+                        initMarkers();
+                    }
+                });
+                dialogFragment.show(ft, TAG_DIALOG);
+            }
+        });
     }
 
     private void updateValuesFromBundle(Bundle savedInstanceState) {
@@ -100,7 +138,7 @@ public class DriverActivity extends FragmentActivity implements
                 mLastUpdateTime = savedInstanceState.getString(
                         LAST_UPDATED_TIME_STRING_KEY);
             }
-            updateUI();
+            updateUI(mLastLocation);
         }
     }
 
@@ -206,7 +244,7 @@ public class DriverActivity extends FragmentActivity implements
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
             if (mLastLocation != null) {
-               updateUI();
+                updateUI(mLastLocation);
             }
 
             if (mRequestingLocationUpdates) {
@@ -289,16 +327,29 @@ public class DriverActivity extends FragmentActivity implements
     @Override
     public void onLocationChanged(Location location) {
         mLastLocation = location;
-        updateUI();
+        updateUI(location);
     }
 
-    private void updateUI() {
+    private void updateUI(Location location) {
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                 new LatLng(mLastLocation.getLatitude(),
                         mLastLocation.getLongitude()),
                 DEFAULT_ZOOM));
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
         lastUpdateTime.setText(mLastUpdateTime);
+
+        checkIfNearMarker(location);
+    }
+
+    private void checkIfNearMarker(Location location) {
+        if(listMarker != null && listMarker.size() > 0) {
+            Location targetLocation = new Location("");//provider name is unecessary
+            targetLocation.setLatitude(listMarker.get(0).getLatitude());//your coords of course
+            targetLocation.setLongitude(listMarker.get(0).getLongitude());
+            if (location.distanceTo(targetLocation) < METERS_100) {
+                currentLocation.setText("Arrived in destination");
+            }
+        }
     }
 
     protected void startLocationUpdates() {
@@ -308,7 +359,7 @@ public class DriverActivity extends FragmentActivity implements
                             android.Manifest.permission.ACCESS_COARSE_LOCATION},
                     PERMISSION_ACCESS_FINE_LOCATION);
             return;
-        }else {
+        } else {
             LocationServices.FusedLocationApi.requestLocationUpdates(
                     mGoogleApiClient, mLocationRequest, this);
         }
@@ -322,6 +373,5 @@ public class DriverActivity extends FragmentActivity implements
         outState.putString(LAST_UPDATED_TIME_STRING_KEY, mLastUpdateTime);
         super.onSaveInstanceState(outState);
     }
-
 
 }
