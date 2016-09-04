@@ -34,8 +34,9 @@
         <activity
             android:name=".DriverActivity"
             android:label="@string/title_activity_driver" />
-        <activity android:name=".CreateOrderActivity"
-            android:label="@string/activity_create_order"/>
+        <activity
+            android:name=".CreateOrderActivity"
+            android:label="@string/activity_create_order" />
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -49,7 +50,12 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
+        <service
+            android:name=".DriveCompanionService"
+            android:enabled="true"
+            android:exported="true"/>
 
+        <receiver android:name=".DriveCompanionReceiver"/>
     </application>
 
 </manifest>

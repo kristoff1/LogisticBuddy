@@ -43,6 +43,7 @@ public class MenuActivity extends AppCompatActivity {
         initializeFirebase();
         initializeMenu(this);
 
+        getApplicationContext().startService(new Intent(this, DriveCompanionService.class));
     }
 
     private void initializeMenu(Context context) {
