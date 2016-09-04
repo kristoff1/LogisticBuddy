@@ -1,7 +1,6 @@
 package com.nisnis.batp.logisticbuddy;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
@@ -39,13 +38,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.nisnis.batp.logisticbuddy.model.Data;
 import com.nisnis.batp.logisticbuddy.model.MapData;
 
-import java.sql.Driver;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -167,14 +167,20 @@ public class DriverActivity extends FragmentActivity implements
 
     private void initializeFirebase() {
         mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
-        mFirebaseDatabaseReference.addValueEventListener(new ValueEventListener() {
+        mFirebaseDatabaseReference.child(getDriverKey()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d("NISINISI", "get data " + dataSnapshot.toString());
 
                 listMarker.clear();
-                Data data = dataSnapshot.getValue(Data.class);
-                listMarker.addAll(data.getMap());
+                Map<String, Object> objectMap = (HashMap<String, Object>)
+                        dataSnapshot.getValue();
+                for (Object obj : objectMap.values()) {
+                    if (obj instanceof Map) {
+                        Map<String, Object> mapObj = (Map<String, Object>) obj;
+                        listMarker.add(MapData.convertFromFirebase(mapObj));
+                    }
+                }
                 initMarkers();
 
             }
@@ -184,6 +190,10 @@ public class DriverActivity extends FragmentActivity implements
                 Log.d("NISINISI", "failed to get data");
             }
         });
+    }
+
+    private String getDriverKey() {
+        return SessionHandler.getCurrentDriver();
     }
 
     @Override
@@ -344,8 +354,8 @@ public class DriverActivity extends FragmentActivity implements
     private void checkIfNearMarker(Location location) {
         if(listMarker != null && listMarker.size() > 0) {
             Location targetLocation = new Location("");//provider name is unecessary
-            targetLocation.setLatitude(listMarker.get(0).getLatitude());//your coords of course
-            targetLocation.setLongitude(listMarker.get(0).getLongitude());
+            targetLocation.setLatitude(listMarker.get(0).getPosition().latitude);//your coords of course
+            targetLocation.setLongitude(listMarker.get(0).getPosition().longitude);
             if (location.distanceTo(targetLocation) < METERS_100) {
                 currentLocation.setText("Arrived in destination");
             }

@@ -24,6 +24,15 @@
         android:text="START DRIVING"/>
 
     <android.support.v7.widget.AppCompatButton
+        android:id="@+id/btn_create_order"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:textColor="@color/white"
+        android:layout_margin="5dp"
+        android:text="ORDER DELIVERY"/>
+
+    <android.support.v7.widget.AppCompatButton
         android:id="@+id/logout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

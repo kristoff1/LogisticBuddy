@@ -5,4 +5,18 @@ package com.nisnis.batp.logisticbuddy.model;
  */
 public class ItemData {
     String id;
+
+    public ItemData(String id) {
+        this.id = id;
+    }
+
+    public ItemData(){}
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }

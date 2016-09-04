@@ -39,14 +39,31 @@ public class LoginActivity extends AppCompatActivity {
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                username.setText("nisietest1@gmail.com");
-                password.setText("nisienisie");
-
+                username.setText("master@batp.com");
+                password.setText("master");
+                checkRole();
                 mFirebaseAuth.signInWithEmailAndPassword(username.getText().toString(), password.getText().toString());
                 startActivity(new Intent(LoginActivity.this, MenuActivity.class));
                 finish();
             }
         });
+    }
+
+    private void checkRole() {
+        switch (username.getText().toString()){
+            case SessionHandler.DRIVER:
+                SessionHandler.setSession(this, SessionHandler.DRIVER);
+                break;
+            case SessionHandler.CLIENT:
+                SessionHandler.setSession(this, SessionHandler.CLIENT);
+                break;
+            case SessionHandler.SERVER:
+                SessionHandler.setSession(this,SessionHandler.SERVER);
+                break;
+            default:
+                SessionHandler.setSession(this, SessionHandler.MASTER);
+                break;
+        }
     }
 
     private void initializeFirebase() {
