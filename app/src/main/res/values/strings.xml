@@ -13,4 +13,5 @@
     <string name="string_google_api_key">AIzaSyCUDDoTuMjOiUBunBhqAc6V18GkXsjWCEk</string>
     <string name="string_google_distance_api_key">AIzaSyASwOGk-18zSIkBPpTpc4FN_8ve3RZ5x0c</string>
 
+    <string name="activity_create_order">Create New Order</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.nisnis.batp.logisticbuddy;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -22,6 +23,9 @@ public class MenuActivity extends AppCompatActivity {
     @BindView(R.id.btn_start_driving)
     Button startDriving;
 
+    @BindView(R.id.btn_create_order)
+    Button createOrder;
+
     @BindView(R.id.logout)
     Button logout;
 
@@ -37,7 +41,30 @@ public class MenuActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         initializeFirebase();
+        initializeMenu(this);
 
+        getApplicationContext().startService(new Intent(this, DriveCompanionService.class));
+    }
+
+    private void initializeMenu(Context context) {
+        switch (SessionHandler.getSession(context)){
+            case SessionHandler.DRIVER:
+                startDriving.setVisibility(View.VISIBLE);
+                createOrder.setVisibility(View.GONE);
+                break;
+            case SessionHandler.CLIENT:
+                startDriving.setVisibility(View.GONE);
+                createOrder.setVisibility(View.VISIBLE);
+                break;
+            case SessionHandler.SERVER:
+                startDriving.setVisibility(View.GONE);
+                createOrder.setVisibility(View.GONE);
+                break;
+            default:
+                startDriving.setVisibility(View.VISIBLE);
+                createOrder.setVisibility(View.VISIBLE);
+                break;
+        }
     }
 
     private void initializeFirebase() {
@@ -60,6 +87,12 @@ public class MenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(MenuActivity.this, DriverActivity.class));
+            }
+        });
+        createOrder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MenuActivity.this, CreateOrderActivity.class));
             }
         });
         logout.setOnClickListener(new View.OnClickListener() {
