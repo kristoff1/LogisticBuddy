@@ -56,6 +56,10 @@
             android:exported="true"/>
 
         <receiver android:name=".DriveCompanionReceiver"/>
+
+        <activity
+            android:name=".MapActivity"
+            android:label="@string/title_activity_admin"/>
     </application>
 
 </manifest>

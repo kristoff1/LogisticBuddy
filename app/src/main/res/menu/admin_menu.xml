@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_manage_client"
+        android:title="@string/string_manage_client" />
+
+    <item android:id="@+id/menu_edit_vehicles"
+        android:title="@string/string_edit_vehicles" />
+
+    <item android:id="@+id/menu_compute_routes"
+        android:title="@string/string_compute_routes" />
+
+
+</menu>
