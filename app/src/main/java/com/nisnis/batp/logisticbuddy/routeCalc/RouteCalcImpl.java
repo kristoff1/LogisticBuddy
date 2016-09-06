@@ -18,6 +18,7 @@ import routing.VehicleRoutingImpl;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -68,9 +69,6 @@ public class RouteCalcImpl implements RouteCalc {
             params.put("key", GOOGLE_API_KEY);
 
             return googleApiConnection.createService().getDistanceMatrix(params)
-                    .subscribeOn(Schedulers.io())
-                    .unsubscribeOn(Schedulers.io())
-                    .observeOn(Schedulers.immediate())
                     .flatMap(new Func1<DistanceMatrix, Observable<SimpleMatrix>>() {
                         @Override
                         public Observable<SimpleMatrix> call(DistanceMatrix distanceMatrix) {
@@ -78,6 +76,9 @@ public class RouteCalcImpl implements RouteCalc {
                             return calculateRouteMatrix(distanceMatrix, vehicleNumber);
                         }
                     })
+                    .subscribeOn(Schedulers.io())
+                    .unsubscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Subscriber<SimpleMatrix>() {
                         @Override
                         public void onCompleted() {
@@ -116,7 +117,8 @@ public class RouteCalcImpl implements RouteCalc {
         Log.i(TAG, distanceSimpleMatrix.toString());
 
         List<Double> clientDemand = new ArrayList<>();
-        for(int i = 0; i < distanceMatrixSize; i++){
+        clientDemand.add(0.0);
+        for(int i = 0; i < distanceMatrix.getRows().size(); i++){
             clientDemand.add(5.0);
         }
 

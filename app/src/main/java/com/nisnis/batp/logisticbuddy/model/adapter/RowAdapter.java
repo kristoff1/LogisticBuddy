@@ -1,4 +1,4 @@
-package com.nisnis.batp.logisticbuddy.model;
+package com.nisnis.batp.logisticbuddy.model.adapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -15,7 +15,7 @@ public class RowAdapter extends RecyclerView.Adapter<RowAdapter.RowViewHolder>{
     List<Double> row;
     int numberTruck;
 
-    public RowAdapter(List<Double> row, int numberTruck) {
+    public void setData(List<Double> row, int numberTruck){
         this.row = row;
         this.numberTruck = numberTruck;
     }

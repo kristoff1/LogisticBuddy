@@ -29,6 +29,9 @@ public class MenuActivity extends AppCompatActivity {
     @BindView(R.id.logout)
     Button logout;
 
+    @BindView(R.id.admin)
+    Button admin;
+
     FirebaseAuth mFirebaseAuth;
     FirebaseUser mFirebaseUser;
 
@@ -100,6 +103,12 @@ public class MenuActivity extends AppCompatActivity {
             public void onClick(View view) {
                 mFirebaseAuth.signOut();
                 startActivity(new Intent(MenuActivity.this, LoginActivity.class));
+            }
+        });
+        admin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MenuActivity.this, MapActivity.class));
             }
         });
     }

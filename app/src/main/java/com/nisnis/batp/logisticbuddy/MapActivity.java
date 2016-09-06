@@ -1,6 +1,5 @@
 package com.nisnis.batp.logisticbuddy;
 
-import android.*;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.IntentSender;
@@ -38,8 +37,8 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.nisnis.batp.logisticbuddy.model.ClientMarker;
-import com.nisnis.batp.logisticbuddy.model.ClientSettingAdapter;
-import com.nisnis.batp.logisticbuddy.model.VehicleRoutingAdapter;
+import com.nisnis.batp.logisticbuddy.model.adapter.ClientSettingAdapter;
+import com.nisnis.batp.logisticbuddy.model.adapter.VehicleRoutingAdapter;
 import com.nisnis.batp.logisticbuddy.routeCalc.RouteCalc;
 import com.nisnis.batp.logisticbuddy.routeCalc.RouteCalcImpl;
 
@@ -189,6 +188,20 @@ public class MapActivity extends AppCompatActivity implements
             @Override
             public void onSuccess(SimpleMatrix s) {
                 Log.i(TAG, "Display Routing Result");
+                displayRouteResult(s);
+            }
+
+            @Override
+            public void onFailure() {
+
+            }
+        };
+    }
+
+    private void displayRouteResult(final SimpleMatrix s) {
+
+//        runOnUiThread(new Runnable() {
+//            public void run() {
                 AlertDialog.Builder builder = new AlertDialog.Builder(MapActivity.this);
                 RecyclerView recyclerView = new RecyclerView(MapActivity.this);
                 VehicleRoutingAdapter resultAdapter = new VehicleRoutingAdapter(s);
@@ -204,13 +217,10 @@ public class MapActivity extends AppCompatActivity implements
                     }
                 });
                 builder.show();
-            }
+//            }
+//        });
 
-            @Override
-            public void onFailure() {
 
-            }
-        };
     }
 
     @Override
@@ -290,7 +300,7 @@ public class MapActivity extends AppCompatActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
+        getMenuInflater().inflate(R.menu.admin_menu, menu);
         return true;
     }
 

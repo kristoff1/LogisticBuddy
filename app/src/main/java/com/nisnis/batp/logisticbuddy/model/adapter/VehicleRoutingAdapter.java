@@ -1,7 +1,7 @@
-package com.nisnis.batp.logisticbuddy.model;
+package com.nisnis.batp.logisticbuddy.model.adapter;
 
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -48,10 +48,14 @@ public class VehicleRoutingAdapter extends RecyclerView.Adapter<VehicleRoutingAd
         public VehicleRoutingViewHolder(View itemView) {
             super(itemView);
             rowMatrix = (RecyclerView) itemView;
+            adapter = new RowAdapter();
+            rowMatrix.setAdapter(adapter);
+            rowMatrix.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
         }
 
-        public void setRow(List<Double> row, int truckNumber) {
-            adapter = new RowAdapter(row, truckNumber);
+
+        public void setRow(List<Double> row, int i) {
+            adapter.setData(row, i);
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.nisnis.batp.logisticbuddy.model;
+package com.nisnis.batp.logisticbuddy.model.adapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.nisnis.batp.logisticbuddy.R;
+import com.nisnis.batp.logisticbuddy.model.ClientMarker;
 
 import java.util.ArrayList;
 import java.util.List;
