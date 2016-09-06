@@ -2,4 +2,15 @@
     <string name="app_name">Logistic Buddy</string>
     <string name="title_activity_menu">Logistic Buddy</string>
     <string name="title_activity_driver">Driver Map</string>
+    <string name="title_activity_admin">Admin Map</string>
+
+    <string name="string_manage_client">Manage Client</string>
+    <string name="string_edit_vehicles">Edit Vehicles</string>
+    <string name="string_compute_routes">Compute Routes</string>
+    <string name="string_setting_client">Setting Client</string>
+    <string name="string_setting_vehicle">Setting Number of Vehicle</string>
+
+    <string name="string_google_api_key">AIzaSyCUDDoTuMjOiUBunBhqAc6V18GkXsjWCEk</string>
+    <string name="string_google_distance_api_key">AIzaSyASwOGk-18zSIkBPpTpc4FN_8ve3RZ5x0c</string>
+
 </resources>

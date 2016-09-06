@@ -46,7 +46,10 @@
 
         <activity
             android:name=".DriverActivity"
-            android:label="@string/title_activity_driver"></activity>
+            android:label="@string/title_activity_driver"/>
+        <activity
+            android:name=".MapActivity"
+            android:label="@string/title_activity_admin"/>
     </application>
 
 </manifest>
